@@ -1032,263 +1032,263 @@
     }
 
     TreeInterpreter.prototype = {
-        search: function (node, value) {
-            return this.visit(node, value);
-        },
+        search: async function (node, value) {
+                return await this.visit(node, value);
+            },
 
-        visit: function (node, value) {
-            var matched, current, result, first, second, field, left, right, collected, i;
-            switch (node.type) {
-                case "Field":
-                    if (value !== null && isObject(value)) {
-                        field = value[node.name];
-                        if (field === undefined) {
+            visit: async function (node, value) {
+                    var matched, current, result, first, second, field, left, right, collected, i;
+                    switch (node.type) {
+                        case "Field":
+                            if (value !== null && isObject(value)) {
+                                field = value[node.name];
+                                if (field === undefined) {
+                                    return null;
+                                } else {
+                                    return field;
+                                }
+                            }
                             return null;
-                        } else {
-                            return field;
-                        }
-                    }
-                    return null;
-                case "Subexpression":
-                    result = this.visit(node.children[0], value);
-                    for (i = 1; i < node.children.length; i++) {
-                        result = this.visit(node.children[1], result);
-                        if (result === null) {
-                            return null;
-                        }
-                    }
-                    return result;
-                case "IndexExpression":
-                    left = this.visit(node.children[0], value);
-                    right = this.visit(node.children[1], left);
-                    return right;
-                case "Index":
-                    if (!isArray(value)) {
-                        return null;
-                    }
-                    var index = node.value;
-                    if (index < 0) {
-                        index = value.length + index;
-                    }
-                    result = value[index];
-                    if (result === undefined) {
-                        result = null;
-                    }
-                    return result;
-                case "Slice":
-                    if (!isArray(value)) {
-                        return null;
-                    }
-                    var sliceParams = node.children.slice(0);
-                    var computed = this.computeSliceParams(value.length, sliceParams);
-                    var start = computed[0];
-                    var stop = computed[1];
-                    var step = computed[2];
-                    result = [];
-                    if (step > 0) {
-                        for (i = start; i < stop; i += step) {
-                            result.push(value[i]);
-                        }
-                    } else {
-                        for (i = start; i > stop; i += step) {
-                            result.push(value[i]);
-                        }
-                    }
-                    return result;
-                case "Projection":
-                    // Evaluate left child.
-                    var base = this.visit(node.children[0], value);
-                    if (!isArray(base)) {
-                        return null;
-                    }
-                    collected = [];
-                    for (i = 0; i < base.length; i++) {
-                        current = this.visit(node.children[1], base[i]);
-                        if (current !== null) {
-                            collected.push(current);
-                        }
-                    }
-                    return collected;
-                case "ValueProjection":
-                    // Evaluate left child.
-                    base = this.visit(node.children[0], value);
-                    if (!isObject(base)) {
-                        return null;
-                    }
-                    collected = [];
-                    var values = objValues(base);
-                    for (i = 0; i < values.length; i++) {
-                        current = this.visit(node.children[1], values[i]);
-                        if (current !== null) {
-                            collected.push(current);
-                        }
-                    }
-                    return collected;
-                case "FilterProjection":
-                    base = this.visit(node.children[0], value);
-                    if (!isArray(base)) {
-                        return null;
-                    }
-                    var filtered = [];
-                    var finalResults = [];
-                    for (i = 0; i < base.length; i++) {
-                        matched = this.visit(node.children[2], base[i]);
-                        if (!isFalse(matched)) {
-                            filtered.push(base[i]);
-                        }
-                    }
-                    for (var j = 0; j < filtered.length; j++) {
-                        current = this.visit(node.children[1], filtered[j]);
-                        if (current !== null) {
-                            finalResults.push(current);
-                        }
-                    }
-                    return finalResults;
-                case "Comparator":
-                    first = this.visit(node.children[0], value);
-                    second = this.visit(node.children[1], value);
-                    switch (node.name) {
-                        case TOK_EQ:
-                            result = strictDeepEqual(first, second);
-                            break;
-                        case TOK_NE:
-                            result = !strictDeepEqual(first, second);
-                            break;
-                        case TOK_GT:
-                            result = first > second;
-                            break;
-                        case TOK_GTE:
-                            result = first >= second;
-                            break;
-                        case TOK_LT:
-                            result = first < second;
-                            break;
-                        case TOK_LTE:
-                            result = first <= second;
-                            break;
+                        case "Subexpression":
+                            result = await this.visit(node.children[0], value);
+                            for (i = 1; i < node.children.length; i++) {
+                                result = await this.visit(node.children[1], result);
+                                if (result === null) {
+                                    return null;
+                                }
+                            }
+                            return result;
+                        case "IndexExpression":
+                            left = await this.visit(node.children[0], value);
+                            right = await this.visit(node.children[1], left);
+                            return right;
+                        case "Index":
+                            if (!isArray(value)) {
+                                return null;
+                            }
+                            var index = node.value;
+                            if (index < 0) {
+                                index = value.length + index;
+                            }
+                            result = value[index];
+                            if (result === undefined) {
+                                result = null;
+                            }
+                            return result;
+                        case "Slice":
+                            if (!isArray(value)) {
+                                return null;
+                            }
+                            var sliceParams = node.children.slice(0);
+                            var computed = this.computeSliceParams(value.length, sliceParams);
+                            var start = computed[0];
+                            var stop = computed[1];
+                            var step = computed[2];
+                            result = [];
+                            if (step > 0) {
+                                for (i = start; i < stop; i += step) {
+                                    result.push(value[i]);
+                                }
+                            } else {
+                                for (i = start; i > stop; i += step) {
+                                    result.push(value[i]);
+                                }
+                            }
+                            return result;
+                        case "Projection":
+                            // Evaluate left child.
+                            var base = await this.visit(node.children[0], value);
+                            if (!isArray(base)) {
+                                return null;
+                            }
+                            collected = [];
+                            for (i = 0; i < base.length; i++) {
+                                current = await this.visit(node.children[1], base[i]);
+                                if (current !== null) {
+                                    collected.push(current);
+                                }
+                            }
+                            return collected;
+                        case "ValueProjection":
+                            // Evaluate left child.
+                            base = await this.visit(node.children[0], value);
+                            if (!isObject(base)) {
+                                return null;
+                            }
+                            collected = [];
+                            var values = objValues(base);
+                            for (i = 0; i < values.length; i++) {
+                                current = await this.visit(node.children[1], values[i]);
+                                if (current !== null) {
+                                    collected.push(current);
+                                }
+                            }
+                            return collected;
+                        case "FilterProjection":
+                            base = await this.visit(node.children[0], value);
+                            if (!isArray(base)) {
+                                return null;
+                            }
+                            var filtered = [];
+                            var finalResults = [];
+                            for (i = 0; i < base.length; i++) {
+                                matched = await this.visit(node.children[2], base[i]);
+                                if (!isFalse(matched)) {
+                                    filtered.push(base[i]);
+                                }
+                            }
+                            for (var j = 0; j < filtered.length; j++) {
+                                current = await this.visit(node.children[1], filtered[j]);
+                                if (current !== null) {
+                                    finalResults.push(current);
+                                }
+                            }
+                            return finalResults;
+                        case "Comparator":
+                            first = await this.visit(node.children[0], value);
+                            second = await this.visit(node.children[1], value);
+                            switch (node.name) {
+                                case TOK_EQ:
+                                    result = strictDeepEqual(first, second);
+                                    break;
+                                case TOK_NE:
+                                    result = !strictDeepEqual(first, second);
+                                    break;
+                                case TOK_GT:
+                                    result = first > second;
+                                    break;
+                                case TOK_GTE:
+                                    result = first >= second;
+                                    break;
+                                case TOK_LT:
+                                    result = first < second;
+                                    break;
+                                case TOK_LTE:
+                                    result = first <= second;
+                                    break;
+                                default:
+                                    throw new Error("Unknown comparator: " + node.name);
+                            }
+                            return result;
+                        case TOK_FLATTEN:
+                            var original = await this.visit(node.children[0], value);
+                            if (!isArray(original)) {
+                                return null;
+                            }
+                            var merged = [];
+                            for (i = 0; i < original.length; i++) {
+                                current = original[i];
+                                if (isArray(current)) {
+                                    merged.push.apply(merged, current);
+                                } else {
+                                    merged.push(current);
+                                }
+                            }
+                            return merged;
+                        case "Identity":
+                            return value;
+                        case "MultiSelectList":
+                            if (value === null) {
+                                return null;
+                            }
+                            collected = [];
+                            for (i = 0; i < node.children.length; i++) {
+                                collected.push(await this.visit(node.children[i], value));
+                            }
+                            return collected;
+                        case "MultiSelectHash":
+                            if (value === null) {
+                                return null;
+                            }
+                            collected = {};
+                            var child;
+                            for (i = 0; i < node.children.length; i++) {
+                                child = node.children[i];
+                                collected[child.name] = await this.visit(child.value, value);
+                            }
+                            return collected;
+                        case "OrExpression":
+                            matched = await this.visit(node.children[0], value);
+                            if (isFalse(matched)) {
+                                matched = await this.visit(node.children[1], value);
+                            }
+                            return matched;
+                        case "AndExpression":
+                            first = await this.visit(node.children[0], value);
+
+                            if (isFalse(first) === true) {
+                                return first;
+                            }
+                            return await this.visit(node.children[1], value);
+                        case "NotExpression":
+                            first = await this.visit(node.children[0], value);
+                            return isFalse(first);
+                        case "Literal":
+                            return node.value;
+                        case TOK_PIPE:
+                            left = await this.visit(node.children[0], value);
+                            return await this.visit(node.children[1], left);
+                        case TOK_CURRENT:
+                            return value;
+                        case "Function":
+                            var resolvedArgs = [];
+                            for (i = 0; i < node.children.length; i++) {
+                                resolvedArgs.push(await this.visit(node.children[i], value));
+                            }
+                            return await this.runtime.callFunction(node.name, resolvedArgs);
+                        case "ExpressionReference":
+                            var refNode = node.children[0];
+                            // Tag the node with a specific attribute so the type
+                            // checker verify the type.
+                            refNode.jmespathType = TOK_EXPREF;
+                            return refNode;
                         default:
-                            throw new Error("Unknown comparator: " + node.name);
+                            throw new Error("Unknown node type: " + node.type);
                     }
-                    return result;
-                case TOK_FLATTEN:
-                    var original = this.visit(node.children[0], value);
-                    if (!isArray(original)) {
-                        return null;
+                },
+
+                computeSliceParams: function (arrayLength, sliceParams) {
+                    var start = sliceParams[0];
+                    var stop = sliceParams[1];
+                    var step = sliceParams[2];
+                    var computed = [null, null, null];
+                    if (step === null) {
+                        step = 1;
+                    } else if (step === 0) {
+                        var error = new Error("Invalid slice, step cannot be 0");
+                        error.name = "RuntimeError";
+                        throw error;
                     }
-                    var merged = [];
-                    for (i = 0; i < original.length; i++) {
-                        current = original[i];
-                        if (isArray(current)) {
-                            merged.push.apply(merged, current);
-                        } else {
-                            merged.push(current);
+                    var stepValueNegative = step < 0 ? true : false;
+
+                    if (start === null) {
+                        start = stepValueNegative ? arrayLength - 1 : 0;
+                    } else {
+                        start = this.capSliceRange(arrayLength, start, step);
+                    }
+
+                    if (stop === null) {
+                        stop = stepValueNegative ? -1 : arrayLength;
+                    } else {
+                        stop = this.capSliceRange(arrayLength, stop, step);
+                    }
+                    computed[0] = start;
+                    computed[1] = stop;
+                    computed[2] = step;
+                    return computed;
+                },
+
+                capSliceRange: function (arrayLength, actualValue, step) {
+                    if (actualValue < 0) {
+                        actualValue += arrayLength;
+                        if (actualValue < 0) {
+                            actualValue = step < 0 ? -1 : 0;
                         }
+                    } else if (actualValue >= arrayLength) {
+                        actualValue = step < 0 ? arrayLength - 1 : arrayLength;
                     }
-                    return merged;
-                case "Identity":
-                    return value;
-                case "MultiSelectList":
-                    if (value === null) {
-                        return null;
-                    }
-                    collected = [];
-                    for (i = 0; i < node.children.length; i++) {
-                        collected.push(this.visit(node.children[i], value));
-                    }
-                    return collected;
-                case "MultiSelectHash":
-                    if (value === null) {
-                        return null;
-                    }
-                    collected = {};
-                    var child;
-                    for (i = 0; i < node.children.length; i++) {
-                        child = node.children[i];
-                        collected[child.name] = this.visit(child.value, value);
-                    }
-                    return collected;
-                case "OrExpression":
-                    matched = this.visit(node.children[0], value);
-                    if (isFalse(matched)) {
-                        matched = this.visit(node.children[1], value);
-                    }
-                    return matched;
-                case "AndExpression":
-                    first = this.visit(node.children[0], value);
-
-                    if (isFalse(first) === true) {
-                        return first;
-                    }
-                    return this.visit(node.children[1], value);
-                case "NotExpression":
-                    first = this.visit(node.children[0], value);
-                    return isFalse(first);
-                case "Literal":
-                    return node.value;
-                case TOK_PIPE:
-                    left = this.visit(node.children[0], value);
-                    return this.visit(node.children[1], left);
-                case TOK_CURRENT:
-                    return value;
-                case "Function":
-                    var resolvedArgs = [];
-                    for (i = 0; i < node.children.length; i++) {
-                        resolvedArgs.push(this.visit(node.children[i], value));
-                    }
-                    return this.runtime.callFunction(node.name, resolvedArgs);
-                case "ExpressionReference":
-                    var refNode = node.children[0];
-                    // Tag the node with a specific attribute so the type
-                    // checker verify the type.
-                    refNode.jmespathType = TOK_EXPREF;
-                    return refNode;
-                default:
-                    throw new Error("Unknown node type: " + node.type);
-            }
-        },
-
-        computeSliceParams: function (arrayLength, sliceParams) {
-            var start = sliceParams[0];
-            var stop = sliceParams[1];
-            var step = sliceParams[2];
-            var computed = [null, null, null];
-            if (step === null) {
-                step = 1;
-            } else if (step === 0) {
-                var error = new Error("Invalid slice, step cannot be 0");
-                error.name = "RuntimeError";
-                throw error;
-            }
-            var stepValueNegative = step < 0 ? true : false;
-
-            if (start === null) {
-                start = stepValueNegative ? arrayLength - 1 : 0;
-            } else {
-                start = this.capSliceRange(arrayLength, start, step);
-            }
-
-            if (stop === null) {
-                stop = stepValueNegative ? -1 : arrayLength;
-            } else {
-                stop = this.capSliceRange(arrayLength, stop, step);
-            }
-            computed[0] = start;
-            computed[1] = stop;
-            computed[2] = step;
-            return computed;
-        },
-
-        capSliceRange: function (arrayLength, actualValue, step) {
-            if (actualValue < 0) {
-                actualValue += arrayLength;
-                if (actualValue < 0) {
-                    actualValue = step < 0 ? -1 : 0;
+                    return actualValue;
                 }
-            } else if (actualValue >= arrayLength) {
-                actualValue = step < 0 ? arrayLength - 1 : arrayLength;
-            }
-            return actualValue;
-        }
 
     };
 
@@ -1497,439 +1497,439 @@
     }
 
     Runtime.prototype = {
-        callFunction: function (name, resolvedArgs) {
-            var functionEntry = this.functionTable[name];
-            if (functionEntry === undefined) {
-                throw new Error("Unknown function: " + name + "()");
-            }
-            this._validateArgs(name, resolvedArgs, functionEntry._signature);
-            return functionEntry._func.call(this, resolvedArgs);
-        },
+        callFunction: async function (name, resolvedArgs) {
+                var functionEntry = this.functionTable[name];
+                if (functionEntry === undefined) {
+                    throw new Error("Unknown function: " + name + "()");
+                }
+                this._validateArgs(name, resolvedArgs, functionEntry._signature);
+                return await functionEntry._func.call(this, resolvedArgs);
+            },
 
-        _validateArgs: function (name, args, signature) {
-            // Validating the args requires validating
-            // the correct arity and the correct type of each arg.
-            // If the last argument is declared as variadic, then we need
-            // a minimum number of args to be required.  Otherwise it has to
-            // be an exact amount.
-            var pluralized;
-            if (signature[signature.length - 1].variadic) {
-                if (args.length < signature.length) {
+            _validateArgs: function (name, args, signature) {
+                // Validating the args requires validating
+                // the correct arity and the correct type of each arg.
+                // If the last argument is declared as variadic, then we need
+                // a minimum number of args to be required.  Otherwise it has to
+                // be an exact amount.
+                var pluralized;
+                if (signature[signature.length - 1].variadic) {
+                    if (args.length < signature.length) {
+                        pluralized = signature.length === 1 ? " argument" : " arguments";
+                        throw new Error("ArgumentError: " + name + "() " +
+                            "takes at least" + signature.length + pluralized +
+                            " but received " + args.length);
+                    }
+                } else if (args.length !== signature.length) {
                     pluralized = signature.length === 1 ? " argument" : " arguments";
                     throw new Error("ArgumentError: " + name + "() " +
-                        "takes at least" + signature.length + pluralized +
+                        "takes " + signature.length + pluralized +
                         " but received " + args.length);
                 }
-            } else if (args.length !== signature.length) {
-                pluralized = signature.length === 1 ? " argument" : " arguments";
-                throw new Error("ArgumentError: " + name + "() " +
-                    "takes " + signature.length + pluralized +
-                    " but received " + args.length);
-            }
-            var currentSpec;
-            var actualType;
-            var typeMatched;
-            for (var i = 0; i < signature.length; i++) {
-                typeMatched = false;
-                currentSpec = signature[i].types;
-                actualType = this._getTypeName(args[i]);
-                for (var j = 0; j < currentSpec.length; j++) {
-                    if (this._typeMatches(actualType, currentSpec[j], args[i])) {
-                        typeMatched = true;
-                        break;
-                    }
-                }
-                if (!typeMatched) {
-                    var expected = currentSpec
-                        .map(function (typeIdentifier) {
-                            return TYPE_NAME_TABLE[typeIdentifier];
-                        })
-                        .join(',');
-                    throw new Error("TypeError: " + name + "() " +
-                        "expected argument " + (i + 1) +
-                        " to be type " + expected +
-                        " but received type " +
-                        TYPE_NAME_TABLE[actualType] + " instead.");
-                }
-            }
-        },
-
-        _typeMatches: function (actual, expected, argValue) {
-            if (expected === TYPE_ANY) {
-                return true;
-            }
-            if (expected === TYPE_ARRAY_STRING ||
-                expected === TYPE_ARRAY_NUMBER ||
-                expected === TYPE_ARRAY) {
-                // The expected type can either just be array,
-                // or it can require a specific subtype (array of numbers).
-                //
-                // The simplest case is if "array" with no subtype is specified.
-                if (expected === TYPE_ARRAY) {
-                    return actual === TYPE_ARRAY;
-                } else if (actual === TYPE_ARRAY) {
-                    // Otherwise we need to check subtypes.
-                    // I think this has potential to be improved.
-                    var subtype;
-                    if (expected === TYPE_ARRAY_NUMBER) {
-                        subtype = TYPE_NUMBER;
-                    } else if (expected === TYPE_ARRAY_STRING) {
-                        subtype = TYPE_STRING;
-                    }
-                    for (var i = 0; i < argValue.length; i++) {
-                        if (!this._typeMatches(
-                                this._getTypeName(argValue[i]), subtype,
-                                argValue[i])) {
-                            return false;
+                var currentSpec;
+                var actualType;
+                var typeMatched;
+                for (var i = 0; i < signature.length; i++) {
+                    typeMatched = false;
+                    currentSpec = signature[i].types;
+                    actualType = this._getTypeName(args[i]);
+                    for (var j = 0; j < currentSpec.length; j++) {
+                        if (this._typeMatches(actualType, currentSpec[j], args[i])) {
+                            typeMatched = true;
+                            break;
                         }
                     }
+                    if (!typeMatched) {
+                        var expected = currentSpec
+                            .map(function (typeIdentifier) {
+                                return TYPE_NAME_TABLE[typeIdentifier];
+                            })
+                            .join(',');
+                        throw new Error("TypeError: " + name + "() " +
+                            "expected argument " + (i + 1) +
+                            " to be type " + expected +
+                            " but received type " +
+                            TYPE_NAME_TABLE[actualType] + " instead.");
+                    }
+                }
+            },
+
+            _typeMatches: function (actual, expected, argValue) {
+                if (expected === TYPE_ANY) {
                     return true;
                 }
-            } else {
-                return actual === expected;
-            }
-        },
-        _getTypeName: function (obj) {
-            switch (Object.prototype.toString.call(obj)) {
-                case "[object String]":
-                    return TYPE_STRING;
-                case "[object Number]":
-                    return TYPE_NUMBER;
-                case "[object Array]":
-                    return TYPE_ARRAY;
-                case "[object Boolean]":
-                    return TYPE_BOOLEAN;
-                case "[object Null]":
-                    return TYPE_NULL;
-                case "[object Object]":
-                    // Check if it's an expref.  If it has, it's been
-                    // tagged with a jmespathType attr of 'Expref';
-                    if (obj.jmespathType === TOK_EXPREF) {
-                        return TYPE_EXPREF;
+                if (expected === TYPE_ARRAY_STRING ||
+                    expected === TYPE_ARRAY_NUMBER ||
+                    expected === TYPE_ARRAY) {
+                    // The expected type can either just be array,
+                    // or it can require a specific subtype (array of numbers).
+                    //
+                    // The simplest case is if "array" with no subtype is specified.
+                    if (expected === TYPE_ARRAY) {
+                        return actual === TYPE_ARRAY;
+                    } else if (actual === TYPE_ARRAY) {
+                        // Otherwise we need to check subtypes.
+                        // I think this has potential to be improved.
+                        var subtype;
+                        if (expected === TYPE_ARRAY_NUMBER) {
+                            subtype = TYPE_NUMBER;
+                        } else if (expected === TYPE_ARRAY_STRING) {
+                            subtype = TYPE_STRING;
+                        }
+                        for (var i = 0; i < argValue.length; i++) {
+                            if (!this._typeMatches(
+                                    this._getTypeName(argValue[i]), subtype,
+                                    argValue[i])) {
+                                return false;
+                            }
+                        }
+                        return true;
+                    }
+                } else {
+                    return actual === expected;
+                }
+            },
+            _getTypeName: function (obj) {
+                switch (Object.prototype.toString.call(obj)) {
+                    case "[object String]":
+                        return TYPE_STRING;
+                    case "[object Number]":
+                        return TYPE_NUMBER;
+                    case "[object Array]":
+                        return TYPE_ARRAY;
+                    case "[object Boolean]":
+                        return TYPE_BOOLEAN;
+                    case "[object Null]":
+                        return TYPE_NULL;
+                    case "[object Object]":
+                        // Check if it's an expref.  If it has, it's been
+                        // tagged with a jmespathType attr of 'Expref';
+                        if (obj.jmespathType === TOK_EXPREF) {
+                            return TYPE_EXPREF;
+                        } else {
+                            return TYPE_OBJECT;
+                        }
+                }
+            },
+
+            _functionStartsWith: function (resolvedArgs) {
+                return resolvedArgs[0].lastIndexOf(resolvedArgs[1]) === 0;
+            },
+
+            _functionEndsWith: function (resolvedArgs) {
+                var searchStr = resolvedArgs[0];
+                var suffix = resolvedArgs[1];
+                return searchStr.indexOf(suffix, searchStr.length - suffix.length) !== -1;
+            },
+
+            _functionReverse: function (resolvedArgs) {
+                var typeName = this._getTypeName(resolvedArgs[0]);
+                if (typeName === TYPE_STRING) {
+                    var originalStr = resolvedArgs[0];
+                    var reversedStr = "";
+                    for (var i = originalStr.length - 1; i >= 0; i--) {
+                        reversedStr += originalStr[i];
+                    }
+                    return reversedStr;
+                } else {
+                    var reversedArray = resolvedArgs[0].slice(0);
+                    reversedArray.reverse();
+                    return reversedArray;
+                }
+            },
+
+            _functionAbs: function (resolvedArgs) {
+                return Math.abs(resolvedArgs[0]);
+            },
+
+            _functionCeil: function (resolvedArgs) {
+                return Math.ceil(resolvedArgs[0]);
+            },
+
+            _functionAvg: function (resolvedArgs) {
+                var sum = 0;
+                var inputArray = resolvedArgs[0];
+                for (var i = 0; i < inputArray.length; i++) {
+                    sum += inputArray[i];
+                }
+                return sum / inputArray.length;
+            },
+
+            _functionContains: function (resolvedArgs) {
+                return resolvedArgs[0].indexOf(resolvedArgs[1]) >= 0;
+            },
+
+            _functionFloor: function (resolvedArgs) {
+                return Math.floor(resolvedArgs[0]);
+            },
+
+            _functionLength: function (resolvedArgs) {
+                if (!isObject(resolvedArgs[0])) {
+                    return resolvedArgs[0].length;
+                } else {
+                    // As far as I can tell, there's no way to get the length
+                    // of an object without O(n) iteration through the object.
+                    return Object.keys(resolvedArgs[0]).length;
+                }
+            },
+
+            _functionMap: function (resolvedArgs) {
+                var mapped = [];
+                var interpreter = this._interpreter;
+                var exprefNode = resolvedArgs[0];
+                var elements = resolvedArgs[1];
+                for (var i = 0; i < elements.length; i++) {
+                    mapped.push(interpreter.visit(exprefNode, elements[i]));
+                }
+                return mapped;
+            },
+
+            _functionMerge: function (resolvedArgs) {
+                var merged = {};
+                for (var i = 0; i < resolvedArgs.length; i++) {
+                    var current = resolvedArgs[i];
+                    for (var key in current) {
+                        merged[key] = current[key];
+                    }
+                }
+                return merged;
+            },
+
+            _functionMax: function (resolvedArgs) {
+                if (resolvedArgs[0].length > 0) {
+                    var typeName = this._getTypeName(resolvedArgs[0][0]);
+                    if (typeName === TYPE_NUMBER) {
+                        return Math.max.apply(Math, resolvedArgs[0]);
                     } else {
-                        return TYPE_OBJECT;
-                    }
-            }
-        },
-
-        _functionStartsWith: function (resolvedArgs) {
-            return resolvedArgs[0].lastIndexOf(resolvedArgs[1]) === 0;
-        },
-
-        _functionEndsWith: function (resolvedArgs) {
-            var searchStr = resolvedArgs[0];
-            var suffix = resolvedArgs[1];
-            return searchStr.indexOf(suffix, searchStr.length - suffix.length) !== -1;
-        },
-
-        _functionReverse: function (resolvedArgs) {
-            var typeName = this._getTypeName(resolvedArgs[0]);
-            if (typeName === TYPE_STRING) {
-                var originalStr = resolvedArgs[0];
-                var reversedStr = "";
-                for (var i = originalStr.length - 1; i >= 0; i--) {
-                    reversedStr += originalStr[i];
-                }
-                return reversedStr;
-            } else {
-                var reversedArray = resolvedArgs[0].slice(0);
-                reversedArray.reverse();
-                return reversedArray;
-            }
-        },
-
-        _functionAbs: function (resolvedArgs) {
-            return Math.abs(resolvedArgs[0]);
-        },
-
-        _functionCeil: function (resolvedArgs) {
-            return Math.ceil(resolvedArgs[0]);
-        },
-
-        _functionAvg: function (resolvedArgs) {
-            var sum = 0;
-            var inputArray = resolvedArgs[0];
-            for (var i = 0; i < inputArray.length; i++) {
-                sum += inputArray[i];
-            }
-            return sum / inputArray.length;
-        },
-
-        _functionContains: function (resolvedArgs) {
-            return resolvedArgs[0].indexOf(resolvedArgs[1]) >= 0;
-        },
-
-        _functionFloor: function (resolvedArgs) {
-            return Math.floor(resolvedArgs[0]);
-        },
-
-        _functionLength: function (resolvedArgs) {
-            if (!isObject(resolvedArgs[0])) {
-                return resolvedArgs[0].length;
-            } else {
-                // As far as I can tell, there's no way to get the length
-                // of an object without O(n) iteration through the object.
-                return Object.keys(resolvedArgs[0]).length;
-            }
-        },
-
-        _functionMap: function (resolvedArgs) {
-            var mapped = [];
-            var interpreter = this._interpreter;
-            var exprefNode = resolvedArgs[0];
-            var elements = resolvedArgs[1];
-            for (var i = 0; i < elements.length; i++) {
-                mapped.push(interpreter.visit(exprefNode, elements[i]));
-            }
-            return mapped;
-        },
-
-        _functionMerge: function (resolvedArgs) {
-            var merged = {};
-            for (var i = 0; i < resolvedArgs.length; i++) {
-                var current = resolvedArgs[i];
-                for (var key in current) {
-                    merged[key] = current[key];
-                }
-            }
-            return merged;
-        },
-
-        _functionMax: function (resolvedArgs) {
-            if (resolvedArgs[0].length > 0) {
-                var typeName = this._getTypeName(resolvedArgs[0][0]);
-                if (typeName === TYPE_NUMBER) {
-                    return Math.max.apply(Math, resolvedArgs[0]);
-                } else {
-                    var elements = resolvedArgs[0];
-                    var maxElement = elements[0];
-                    for (var i = 1; i < elements.length; i++) {
-                        if (maxElement.localeCompare(elements[i]) < 0) {
-                            maxElement = elements[i];
+                        var elements = resolvedArgs[0];
+                        var maxElement = elements[0];
+                        for (var i = 1; i < elements.length; i++) {
+                            if (maxElement.localeCompare(elements[i]) < 0) {
+                                maxElement = elements[i];
+                            }
                         }
+                        return maxElement;
                     }
-                    return maxElement;
-                }
-            } else {
-                return null;
-            }
-        },
-
-        _functionMin: function (resolvedArgs) {
-            if (resolvedArgs[0].length > 0) {
-                var typeName = this._getTypeName(resolvedArgs[0][0]);
-                if (typeName === TYPE_NUMBER) {
-                    return Math.min.apply(Math, resolvedArgs[0]);
                 } else {
-                    var elements = resolvedArgs[0];
-                    var minElement = elements[0];
-                    for (var i = 1; i < elements.length; i++) {
-                        if (elements[i].localeCompare(minElement) < 0) {
-                            minElement = elements[i];
+                    return null;
+                }
+            },
+
+            _functionMin: function (resolvedArgs) {
+                if (resolvedArgs[0].length > 0) {
+                    var typeName = this._getTypeName(resolvedArgs[0][0]);
+                    if (typeName === TYPE_NUMBER) {
+                        return Math.min.apply(Math, resolvedArgs[0]);
+                    } else {
+                        var elements = resolvedArgs[0];
+                        var minElement = elements[0];
+                        for (var i = 1; i < elements.length; i++) {
+                            if (elements[i].localeCompare(minElement) < 0) {
+                                minElement = elements[i];
+                            }
                         }
+                        return minElement;
                     }
-                    return minElement;
+                } else {
+                    return null;
                 }
-            } else {
+            },
+
+            _functionSum: function (resolvedArgs) {
+                var sum = 0;
+                var listToSum = resolvedArgs[0];
+                for (var i = 0; i < listToSum.length; i++) {
+                    sum += listToSum[i];
+                }
+                return sum;
+            },
+
+            _functionType: function (resolvedArgs) {
+                switch (this._getTypeName(resolvedArgs[0])) {
+                    case TYPE_NUMBER:
+                        return "number";
+                    case TYPE_STRING:
+                        return "string";
+                    case TYPE_ARRAY:
+                        return "array";
+                    case TYPE_OBJECT:
+                        return "object";
+                    case TYPE_BOOLEAN:
+                        return "boolean";
+                    case TYPE_EXPREF:
+                        return "expref";
+                    case TYPE_NULL:
+                        return "null";
+                }
+            },
+
+            _functionKeys: function (resolvedArgs) {
+                return Object.keys(resolvedArgs[0]);
+            },
+
+            _functionValues: function (resolvedArgs) {
+                var obj = resolvedArgs[0];
+                var keys = Object.keys(obj);
+                var values = [];
+                for (var i = 0; i < keys.length; i++) {
+                    values.push(obj[keys[i]]);
+                }
+                return values;
+            },
+
+            _functionJoin: function (resolvedArgs) {
+                var joinChar = resolvedArgs[0];
+                var listJoin = resolvedArgs[1];
+                return listJoin.join(joinChar);
+            },
+
+            _functionToArray: function (resolvedArgs) {
+                if (this._getTypeName(resolvedArgs[0]) === TYPE_ARRAY) {
+                    return resolvedArgs[0];
+                } else {
+                    return [resolvedArgs[0]];
+                }
+            },
+
+            _functionToString: function (resolvedArgs) {
+                if (this._getTypeName(resolvedArgs[0]) === TYPE_STRING) {
+                    return resolvedArgs[0];
+                } else {
+                    return JSON.stringify(resolvedArgs[0]);
+                }
+            },
+
+            _functionToNumber: function (resolvedArgs) {
+                var typeName = this._getTypeName(resolvedArgs[0]);
+                var convertedValue;
+                if (typeName === TYPE_NUMBER) {
+                    return resolvedArgs[0];
+                } else if (typeName === TYPE_STRING) {
+                    convertedValue = +resolvedArgs[0];
+                    if (!isNaN(convertedValue)) {
+                        return convertedValue;
+                    }
+                }
                 return null;
-            }
-        },
+            },
 
-        _functionSum: function (resolvedArgs) {
-            var sum = 0;
-            var listToSum = resolvedArgs[0];
-            for (var i = 0; i < listToSum.length; i++) {
-                sum += listToSum[i];
-            }
-            return sum;
-        },
-
-        _functionType: function (resolvedArgs) {
-            switch (this._getTypeName(resolvedArgs[0])) {
-                case TYPE_NUMBER:
-                    return "number";
-                case TYPE_STRING:
-                    return "string";
-                case TYPE_ARRAY:
-                    return "array";
-                case TYPE_OBJECT:
-                    return "object";
-                case TYPE_BOOLEAN:
-                    return "boolean";
-                case TYPE_EXPREF:
-                    return "expref";
-                case TYPE_NULL:
-                    return "null";
-            }
-        },
-
-        _functionKeys: function (resolvedArgs) {
-            return Object.keys(resolvedArgs[0]);
-        },
-
-        _functionValues: function (resolvedArgs) {
-            var obj = resolvedArgs[0];
-            var keys = Object.keys(obj);
-            var values = [];
-            for (var i = 0; i < keys.length; i++) {
-                values.push(obj[keys[i]]);
-            }
-            return values;
-        },
-
-        _functionJoin: function (resolvedArgs) {
-            var joinChar = resolvedArgs[0];
-            var listJoin = resolvedArgs[1];
-            return listJoin.join(joinChar);
-        },
-
-        _functionToArray: function (resolvedArgs) {
-            if (this._getTypeName(resolvedArgs[0]) === TYPE_ARRAY) {
-                return resolvedArgs[0];
-            } else {
-                return [resolvedArgs[0]];
-            }
-        },
-
-        _functionToString: function (resolvedArgs) {
-            if (this._getTypeName(resolvedArgs[0]) === TYPE_STRING) {
-                return resolvedArgs[0];
-            } else {
-                return JSON.stringify(resolvedArgs[0]);
-            }
-        },
-
-        _functionToNumber: function (resolvedArgs) {
-            var typeName = this._getTypeName(resolvedArgs[0]);
-            var convertedValue;
-            if (typeName === TYPE_NUMBER) {
-                return resolvedArgs[0];
-            } else if (typeName === TYPE_STRING) {
-                convertedValue = +resolvedArgs[0];
-                if (!isNaN(convertedValue)) {
-                    return convertedValue;
+            _functionNotNull: function (resolvedArgs) {
+                for (var i = 0; i < resolvedArgs.length; i++) {
+                    if (this._getTypeName(resolvedArgs[i]) !== TYPE_NULL) {
+                        return resolvedArgs[i];
+                    }
                 }
-            }
-            return null;
-        },
+                return null;
+            },
 
-        _functionNotNull: function (resolvedArgs) {
-            for (var i = 0; i < resolvedArgs.length; i++) {
-                if (this._getTypeName(resolvedArgs[i]) !== TYPE_NULL) {
-                    return resolvedArgs[i];
-                }
-            }
-            return null;
-        },
-
-        _functionSort: function (resolvedArgs) {
-            var sortedArray = resolvedArgs[0].slice(0);
-            sortedArray.sort();
-            return sortedArray;
-        },
-
-        _functionSortBy: function (resolvedArgs) {
-            var sortedArray = resolvedArgs[0].slice(0);
-            if (sortedArray.length === 0) {
+            _functionSort: function (resolvedArgs) {
+                var sortedArray = resolvedArgs[0].slice(0);
+                sortedArray.sort();
                 return sortedArray;
-            }
-            var interpreter = this._interpreter;
-            var exprefNode = resolvedArgs[1];
-            var requiredType = this._getTypeName(
-                interpreter.visit(exprefNode, sortedArray[0]));
-            if ([TYPE_NUMBER, TYPE_STRING].indexOf(requiredType) < 0) {
-                throw new Error("TypeError");
-            }
-            var that = this;
-            // In order to get a stable sort out of an unstable
-            // sort algorithm, we decorate/sort/undecorate (DSU)
-            // by creating a new list of [index, element] pairs.
-            // In the cmp function, if the evaluated elements are
-            // equal, then the index will be used as the tiebreaker.
-            // After the decorated list has been sorted, it will be
-            // undecorated to extract the original elements.
-            var decorated = [];
-            for (var i = 0; i < sortedArray.length; i++) {
-                decorated.push([i, sortedArray[i]]);
-            }
-            decorated.sort(function (a, b) {
-                var exprA = interpreter.visit(exprefNode, a[1]);
-                var exprB = interpreter.visit(exprefNode, b[1]);
-                if (that._getTypeName(exprA) !== requiredType) {
-                    throw new Error(
-                        "TypeError: expected " + requiredType + ", received " +
-                        that._getTypeName(exprA));
-                } else if (that._getTypeName(exprB) !== requiredType) {
-                    throw new Error(
-                        "TypeError: expected " + requiredType + ", received " +
-                        that._getTypeName(exprB));
-                }
-                if (exprA > exprB) {
-                    return 1;
-                } else if (exprA < exprB) {
-                    return -1;
-                } else {
-                    // If they're equal compare the items by their
-                    // order to maintain relative order of equal keys
-                    // (i.e. to get a stable sort).
-                    return a[0] - b[0];
-                }
-            });
-            // Undecorate: extract out the original list elements.
-            for (var j = 0; j < decorated.length; j++) {
-                sortedArray[j] = decorated[j][1];
-            }
-            return sortedArray;
-        },
+            },
 
-        _functionMaxBy: function (resolvedArgs) {
-            var exprefNode = resolvedArgs[1];
-            var resolvedArray = resolvedArgs[0];
-            var keyFunction = this.createKeyFunction(exprefNode, [TYPE_NUMBER, TYPE_STRING]);
-            var maxNumber = -Infinity;
-            var maxRecord;
-            var current;
-            for (var i = 0; i < resolvedArray.length; i++) {
-                current = keyFunction(resolvedArray[i]);
-                if (current > maxNumber) {
-                    maxNumber = current;
-                    maxRecord = resolvedArray[i];
+            _functionSortBy: function (resolvedArgs) {
+                var sortedArray = resolvedArgs[0].slice(0);
+                if (sortedArray.length === 0) {
+                    return sortedArray;
                 }
-            }
-            return maxRecord;
-        },
+                var interpreter = this._interpreter;
+                var exprefNode = resolvedArgs[1];
+                var requiredType = this._getTypeName(
+                    interpreter.visit(exprefNode, sortedArray[0]));
+                if ([TYPE_NUMBER, TYPE_STRING].indexOf(requiredType) < 0) {
+                    throw new Error("TypeError");
+                }
+                var that = this;
+                // In order to get a stable sort out of an unstable
+                // sort algorithm, we decorate/sort/undecorate (DSU)
+                // by creating a new list of [index, element] pairs.
+                // In the cmp function, if the evaluated elements are
+                // equal, then the index will be used as the tiebreaker.
+                // After the decorated list has been sorted, it will be
+                // undecorated to extract the original elements.
+                var decorated = [];
+                for (var i = 0; i < sortedArray.length; i++) {
+                    decorated.push([i, sortedArray[i]]);
+                }
+                decorated.sort(function (a, b) {
+                    var exprA = interpreter.visit(exprefNode, a[1]);
+                    var exprB = interpreter.visit(exprefNode, b[1]);
+                    if (that._getTypeName(exprA) !== requiredType) {
+                        throw new Error(
+                            "TypeError: expected " + requiredType + ", received " +
+                            that._getTypeName(exprA));
+                    } else if (that._getTypeName(exprB) !== requiredType) {
+                        throw new Error(
+                            "TypeError: expected " + requiredType + ", received " +
+                            that._getTypeName(exprB));
+                    }
+                    if (exprA > exprB) {
+                        return 1;
+                    } else if (exprA < exprB) {
+                        return -1;
+                    } else {
+                        // If they're equal compare the items by their
+                        // order to maintain relative order of equal keys
+                        // (i.e. to get a stable sort).
+                        return a[0] - b[0];
+                    }
+                });
+                // Undecorate: extract out the original list elements.
+                for (var j = 0; j < decorated.length; j++) {
+                    sortedArray[j] = decorated[j][1];
+                }
+                return sortedArray;
+            },
 
-        _functionMinBy: function (resolvedArgs) {
-            var exprefNode = resolvedArgs[1];
-            var resolvedArray = resolvedArgs[0];
-            var keyFunction = this.createKeyFunction(exprefNode, [TYPE_NUMBER, TYPE_STRING]);
-            var minNumber = Infinity;
-            var minRecord;
-            var current;
-            for (var i = 0; i < resolvedArray.length; i++) {
-                current = keyFunction(resolvedArray[i]);
-                if (current < minNumber) {
-                    minNumber = current;
-                    minRecord = resolvedArray[i];
+            _functionMaxBy: function (resolvedArgs) {
+                var exprefNode = resolvedArgs[1];
+                var resolvedArray = resolvedArgs[0];
+                var keyFunction = this.createKeyFunction(exprefNode, [TYPE_NUMBER, TYPE_STRING]);
+                var maxNumber = -Infinity;
+                var maxRecord;
+                var current;
+                for (var i = 0; i < resolvedArray.length; i++) {
+                    current = keyFunction(resolvedArray[i]);
+                    if (current > maxNumber) {
+                        maxNumber = current;
+                        maxRecord = resolvedArray[i];
+                    }
                 }
-            }
-            return minRecord;
-        },
+                return maxRecord;
+            },
 
-        createKeyFunction: function (exprefNode, allowedTypes) {
-            var that = this;
-            var interpreter = this._interpreter;
-            var keyFunc = function (x) {
-                var current = interpreter.visit(exprefNode, x);
-                if (allowedTypes.indexOf(that._getTypeName(current)) < 0) {
-                    var msg = "TypeError: expected one of " + allowedTypes +
-                        ", received " + that._getTypeName(current);
-                    throw new Error(msg);
+            _functionMinBy: function (resolvedArgs) {
+                var exprefNode = resolvedArgs[1];
+                var resolvedArray = resolvedArgs[0];
+                var keyFunction = this.createKeyFunction(exprefNode, [TYPE_NUMBER, TYPE_STRING]);
+                var minNumber = Infinity;
+                var minRecord;
+                var current;
+                for (var i = 0; i < resolvedArray.length; i++) {
+                    current = keyFunction(resolvedArray[i]);
+                    if (current < minNumber) {
+                        minNumber = current;
+                        minRecord = resolvedArray[i];
+                    }
                 }
-                return current;
-            };
-            return keyFunc;
-        }
+                return minRecord;
+            },
+
+            createKeyFunction: function (exprefNode, allowedTypes) {
+                var that = this;
+                var interpreter = this._interpreter;
+                var keyFunc = function (x) {
+                    var current = interpreter.visit(exprefNode, x);
+                    if (allowedTypes.indexOf(that._getTypeName(current)) < 0) {
+                        var msg = "TypeError: expected one of " + allowedTypes +
+                            ", received " + that._getTypeName(current);
+                        throw new Error(msg);
+                    }
+                    return current;
+                };
+                return keyFunc;
+            }
 
     };
 
@@ -1944,7 +1944,7 @@
         return lexer.tokenize(stream);
     }
 
-    function search(data, expression, options) {
+    async function search(data, expression, options) {
         var parser = new Parser();
         // This needs to be improved.  Both the interpreter and runtime depend on
         // each other.  The runtime needs the interpreter to support exprefs.
@@ -1953,7 +1953,7 @@
         var interpreter = new TreeInterpreter(runtime);
         runtime._interpreter = interpreter;
         var node = parser.parse(expression);
-        return interpreter.search(node, data);
+        return await interpreter.search(node, data);
     }
 
     exports.tokenize = tokenize;
