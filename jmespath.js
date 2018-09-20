@@ -1673,263 +1673,263 @@
                 }
             },
 
-            _functionMap: function (resolvedArgs) {
-                var mapped = [];
-                var interpreter = this._interpreter;
-                var exprefNode = resolvedArgs[0];
-                var elements = resolvedArgs[1];
-                for (var i = 0; i < elements.length; i++) {
-                    mapped.push(interpreter.visit(exprefNode, elements[i]));
-                }
-                return mapped;
-            },
-
-            _functionMerge: function (resolvedArgs) {
-                var merged = {};
-                for (var i = 0; i < resolvedArgs.length; i++) {
-                    var current = resolvedArgs[i];
-                    for (var key in current) {
-                        merged[key] = current[key];
+            _functionMap: async function (resolvedArgs) {
+                    var mapped = [];
+                    var interpreter = this._interpreter;
+                    var exprefNode = resolvedArgs[0];
+                    var elements = resolvedArgs[1];
+                    for (var i = 0; i < elements.length; i++) {
+                        mapped.push(await interpreter.visit(exprefNode, elements[i]));
                     }
-                }
-                return merged;
-            },
+                    return mapped;
+                },
 
-            _functionMax: function (resolvedArgs) {
-                if (resolvedArgs[0].length > 0) {
-                    var typeName = this._getTypeName(resolvedArgs[0][0]);
-                    if (typeName === TYPE_NUMBER) {
-                        return Math.max.apply(Math, resolvedArgs[0]);
-                    } else {
-                        var elements = resolvedArgs[0];
-                        var maxElement = elements[0];
-                        for (var i = 1; i < elements.length; i++) {
-                            if (maxElement.localeCompare(elements[i]) < 0) {
-                                maxElement = elements[i];
-                            }
+                _functionMerge: function (resolvedArgs) {
+                    var merged = {};
+                    for (var i = 0; i < resolvedArgs.length; i++) {
+                        var current = resolvedArgs[i];
+                        for (var key in current) {
+                            merged[key] = current[key];
                         }
-                        return maxElement;
                     }
-                } else {
-                    return null;
-                }
-            },
+                    return merged;
+                },
 
-            _functionMin: function (resolvedArgs) {
-                if (resolvedArgs[0].length > 0) {
-                    var typeName = this._getTypeName(resolvedArgs[0][0]);
-                    if (typeName === TYPE_NUMBER) {
-                        return Math.min.apply(Math, resolvedArgs[0]);
-                    } else {
-                        var elements = resolvedArgs[0];
-                        var minElement = elements[0];
-                        for (var i = 1; i < elements.length; i++) {
-                            if (elements[i].localeCompare(minElement) < 0) {
-                                minElement = elements[i];
+                _functionMax: function (resolvedArgs) {
+                    if (resolvedArgs[0].length > 0) {
+                        var typeName = this._getTypeName(resolvedArgs[0][0]);
+                        if (typeName === TYPE_NUMBER) {
+                            return Math.max.apply(Math, resolvedArgs[0]);
+                        } else {
+                            var elements = resolvedArgs[0];
+                            var maxElement = elements[0];
+                            for (var i = 1; i < elements.length; i++) {
+                                if (maxElement.localeCompare(elements[i]) < 0) {
+                                    maxElement = elements[i];
+                                }
                             }
+                            return maxElement;
                         }
-                        return minElement;
+                    } else {
+                        return null;
                     }
-                } else {
+                },
+
+                _functionMin: function (resolvedArgs) {
+                    if (resolvedArgs[0].length > 0) {
+                        var typeName = this._getTypeName(resolvedArgs[0][0]);
+                        if (typeName === TYPE_NUMBER) {
+                            return Math.min.apply(Math, resolvedArgs[0]);
+                        } else {
+                            var elements = resolvedArgs[0];
+                            var minElement = elements[0];
+                            for (var i = 1; i < elements.length; i++) {
+                                if (elements[i].localeCompare(minElement) < 0) {
+                                    minElement = elements[i];
+                                }
+                            }
+                            return minElement;
+                        }
+                    } else {
+                        return null;
+                    }
+                },
+
+                _functionSum: function (resolvedArgs) {
+                    var sum = 0;
+                    var listToSum = resolvedArgs[0];
+                    for (var i = 0; i < listToSum.length; i++) {
+                        sum += listToSum[i];
+                    }
+                    return sum;
+                },
+
+                _functionType: function (resolvedArgs) {
+                    switch (this._getTypeName(resolvedArgs[0])) {
+                        case TYPE_NUMBER:
+                            return "number";
+                        case TYPE_STRING:
+                            return "string";
+                        case TYPE_ARRAY:
+                            return "array";
+                        case TYPE_OBJECT:
+                            return "object";
+                        case TYPE_BOOLEAN:
+                            return "boolean";
+                        case TYPE_EXPREF:
+                            return "expref";
+                        case TYPE_NULL:
+                            return "null";
+                    }
+                },
+
+                _functionKeys: function (resolvedArgs) {
+                    return Object.keys(resolvedArgs[0]);
+                },
+
+                _functionValues: function (resolvedArgs) {
+                    var obj = resolvedArgs[0];
+                    var keys = Object.keys(obj);
+                    var values = [];
+                    for (var i = 0; i < keys.length; i++) {
+                        values.push(obj[keys[i]]);
+                    }
+                    return values;
+                },
+
+                _functionJoin: function (resolvedArgs) {
+                    var joinChar = resolvedArgs[0];
+                    var listJoin = resolvedArgs[1];
+                    return listJoin.join(joinChar);
+                },
+
+                _functionToArray: function (resolvedArgs) {
+                    if (this._getTypeName(resolvedArgs[0]) === TYPE_ARRAY) {
+                        return resolvedArgs[0];
+                    } else {
+                        return [resolvedArgs[0]];
+                    }
+                },
+
+                _functionToString: function (resolvedArgs) {
+                    if (this._getTypeName(resolvedArgs[0]) === TYPE_STRING) {
+                        return resolvedArgs[0];
+                    } else {
+                        return JSON.stringify(resolvedArgs[0]);
+                    }
+                },
+
+                _functionToNumber: function (resolvedArgs) {
+                    var typeName = this._getTypeName(resolvedArgs[0]);
+                    var convertedValue;
+                    if (typeName === TYPE_NUMBER) {
+                        return resolvedArgs[0];
+                    } else if (typeName === TYPE_STRING) {
+                        convertedValue = +resolvedArgs[0];
+                        if (!isNaN(convertedValue)) {
+                            return convertedValue;
+                        }
+                    }
                     return null;
-                }
-            },
+                },
 
-            _functionSum: function (resolvedArgs) {
-                var sum = 0;
-                var listToSum = resolvedArgs[0];
-                for (var i = 0; i < listToSum.length; i++) {
-                    sum += listToSum[i];
-                }
-                return sum;
-            },
-
-            _functionType: function (resolvedArgs) {
-                switch (this._getTypeName(resolvedArgs[0])) {
-                    case TYPE_NUMBER:
-                        return "number";
-                    case TYPE_STRING:
-                        return "string";
-                    case TYPE_ARRAY:
-                        return "array";
-                    case TYPE_OBJECT:
-                        return "object";
-                    case TYPE_BOOLEAN:
-                        return "boolean";
-                    case TYPE_EXPREF:
-                        return "expref";
-                    case TYPE_NULL:
-                        return "null";
-                }
-            },
-
-            _functionKeys: function (resolvedArgs) {
-                return Object.keys(resolvedArgs[0]);
-            },
-
-            _functionValues: function (resolvedArgs) {
-                var obj = resolvedArgs[0];
-                var keys = Object.keys(obj);
-                var values = [];
-                for (var i = 0; i < keys.length; i++) {
-                    values.push(obj[keys[i]]);
-                }
-                return values;
-            },
-
-            _functionJoin: function (resolvedArgs) {
-                var joinChar = resolvedArgs[0];
-                var listJoin = resolvedArgs[1];
-                return listJoin.join(joinChar);
-            },
-
-            _functionToArray: function (resolvedArgs) {
-                if (this._getTypeName(resolvedArgs[0]) === TYPE_ARRAY) {
-                    return resolvedArgs[0];
-                } else {
-                    return [resolvedArgs[0]];
-                }
-            },
-
-            _functionToString: function (resolvedArgs) {
-                if (this._getTypeName(resolvedArgs[0]) === TYPE_STRING) {
-                    return resolvedArgs[0];
-                } else {
-                    return JSON.stringify(resolvedArgs[0]);
-                }
-            },
-
-            _functionToNumber: function (resolvedArgs) {
-                var typeName = this._getTypeName(resolvedArgs[0]);
-                var convertedValue;
-                if (typeName === TYPE_NUMBER) {
-                    return resolvedArgs[0];
-                } else if (typeName === TYPE_STRING) {
-                    convertedValue = +resolvedArgs[0];
-                    if (!isNaN(convertedValue)) {
-                        return convertedValue;
+                _functionNotNull: function (resolvedArgs) {
+                    for (var i = 0; i < resolvedArgs.length; i++) {
+                        if (this._getTypeName(resolvedArgs[i]) !== TYPE_NULL) {
+                            return resolvedArgs[i];
+                        }
                     }
-                }
-                return null;
-            },
+                    return null;
+                },
 
-            _functionNotNull: function (resolvedArgs) {
-                for (var i = 0; i < resolvedArgs.length; i++) {
-                    if (this._getTypeName(resolvedArgs[i]) !== TYPE_NULL) {
-                        return resolvedArgs[i];
-                    }
-                }
-                return null;
-            },
-
-            _functionSort: function (resolvedArgs) {
-                var sortedArray = resolvedArgs[0].slice(0);
-                sortedArray.sort();
-                return sortedArray;
-            },
-
-            _functionSortBy: function (resolvedArgs) {
-                var sortedArray = resolvedArgs[0].slice(0);
-                if (sortedArray.length === 0) {
+                _functionSort: function (resolvedArgs) {
+                    var sortedArray = resolvedArgs[0].slice(0);
+                    sortedArray.sort();
                     return sortedArray;
-                }
-                var interpreter = this._interpreter;
-                var exprefNode = resolvedArgs[1];
-                var requiredType = this._getTypeName(
-                    interpreter.visit(exprefNode, sortedArray[0]));
-                if ([TYPE_NUMBER, TYPE_STRING].indexOf(requiredType) < 0) {
-                    throw new Error("TypeError");
-                }
-                var that = this;
-                // In order to get a stable sort out of an unstable
-                // sort algorithm, we decorate/sort/undecorate (DSU)
-                // by creating a new list of [index, element] pairs.
-                // In the cmp function, if the evaluated elements are
-                // equal, then the index will be used as the tiebreaker.
-                // After the decorated list has been sorted, it will be
-                // undecorated to extract the original elements.
-                var decorated = [];
-                for (var i = 0; i < sortedArray.length; i++) {
-                    decorated.push([i, sortedArray[i]]);
-                }
-                decorated.sort(function (a, b) {
-                    var exprA = interpreter.visit(exprefNode, a[1]);
-                    var exprB = interpreter.visit(exprefNode, b[1]);
-                    if (that._getTypeName(exprA) !== requiredType) {
-                        throw new Error(
-                            "TypeError: expected " + requiredType + ", received " +
-                            that._getTypeName(exprA));
-                    } else if (that._getTypeName(exprB) !== requiredType) {
-                        throw new Error(
-                            "TypeError: expected " + requiredType + ", received " +
-                            that._getTypeName(exprB));
-                    }
-                    if (exprA > exprB) {
-                        return 1;
-                    } else if (exprA < exprB) {
-                        return -1;
-                    } else {
-                        // If they're equal compare the items by their
-                        // order to maintain relative order of equal keys
-                        // (i.e. to get a stable sort).
-                        return a[0] - b[0];
-                    }
-                });
-                // Undecorate: extract out the original list elements.
-                for (var j = 0; j < decorated.length; j++) {
-                    sortedArray[j] = decorated[j][1];
-                }
-                return sortedArray;
-            },
+                },
 
-            _functionMaxBy: function (resolvedArgs) {
-                var exprefNode = resolvedArgs[1];
-                var resolvedArray = resolvedArgs[0];
-                var keyFunction = this.createKeyFunction(exprefNode, [TYPE_NUMBER, TYPE_STRING]);
-                var maxNumber = -Infinity;
-                var maxRecord;
-                var current;
-                for (var i = 0; i < resolvedArray.length; i++) {
-                    current = keyFunction(resolvedArray[i]);
-                    if (current > maxNumber) {
-                        maxNumber = current;
-                        maxRecord = resolvedArray[i];
-                    }
-                }
-                return maxRecord;
-            },
+                _functionSortBy: async function (resolvedArgs) {
+                        var sortedArray = resolvedArgs[0].slice(0);
+                        if (sortedArray.length === 0) {
+                            return sortedArray;
+                        }
+                        var interpreter = this._interpreter;
+                        var exprefNode = resolvedArgs[1];
+                        var requiredType = this._getTypeName(
+                            await interpreter.visit(exprefNode, sortedArray[0]));
+                        if ([TYPE_NUMBER, TYPE_STRING].indexOf(requiredType) < 0) {
+                            throw new Error("TypeError");
+                        }
+                        var that = this;
+                        // In order to get a stable sort out of an unstable
+                        // sort algorithm, we decorate/sort/undecorate (DSU)
+                        // by creating a new list of [index, element] pairs.
+                        // In the cmp function, if the evaluated elements are
+                        // equal, then the index will be used as the tiebreaker.
+                        // After the decorated list has been sorted, it will be
+                        // undecorated to extract the original elements.
+                        var decorated = [];
+                        for (var i = 0; i < sortedArray.length; i++) {
+                            decorated.push([i, sortedArray[i], await interpreter.visit(exprefNode, sortedArray[i])]);
+                        }
+                        decorated.sort(function (a, b) {
+                            var exprA = a[2];
+                            var exprB = b[2];
+                            if (that._getTypeName(exprA) !== requiredType) {
+                                throw new Error(
+                                    "TypeError: expected " + requiredType + ", received " +
+                                    that._getTypeName(exprA));
+                            } else if (that._getTypeName(exprB) !== requiredType) {
+                                throw new Error(
+                                    "TypeError: expected " + requiredType + ", received " +
+                                    that._getTypeName(exprB));
+                            }
+                            if (exprA > exprB) {
+                                return 1;
+                            } else if (exprA < exprB) {
+                                return -1;
+                            } else {
+                                // If they're equal compare the items by their
+                                // order to maintain relative order of equal keys
+                                // (i.e. to get a stable sort).
+                                return a[0] - b[0];
+                            }
+                        });
+                        // Undecorate: extract out the original list elements.
+                        for (var j = 0; j < decorated.length; j++) {
+                            sortedArray[j] = decorated[j][1];
+                        }
+                        return sortedArray;
+                    },
 
-            _functionMinBy: function (resolvedArgs) {
-                var exprefNode = resolvedArgs[1];
-                var resolvedArray = resolvedArgs[0];
-                var keyFunction = this.createKeyFunction(exprefNode, [TYPE_NUMBER, TYPE_STRING]);
-                var minNumber = Infinity;
-                var minRecord;
-                var current;
-                for (var i = 0; i < resolvedArray.length; i++) {
-                    current = keyFunction(resolvedArray[i]);
-                    if (current < minNumber) {
-                        minNumber = current;
-                        minRecord = resolvedArray[i];
-                    }
-                }
-                return minRecord;
-            },
+                    _functionMaxBy: async function (resolvedArgs) {
+                            var exprefNode = resolvedArgs[1];
+                            var resolvedArray = resolvedArgs[0];
+                            var keyFunction = this.createKeyFunction(exprefNode, [TYPE_NUMBER, TYPE_STRING]);
+                            var maxNumber = -Infinity;
+                            var maxRecord;
+                            var current;
+                            for (var i = 0; i < resolvedArray.length; i++) {
+                                current = await keyFunction(resolvedArray[i]);
+                                if (current > maxNumber) {
+                                    maxNumber = current;
+                                    maxRecord = resolvedArray[i];
+                                }
+                            }
+                            return maxRecord;
+                        },
 
-            createKeyFunction: function (exprefNode, allowedTypes) {
-                var that = this;
-                var interpreter = this._interpreter;
-                var keyFunc = function (x) {
-                    var current = interpreter.visit(exprefNode, x);
-                    if (allowedTypes.indexOf(that._getTypeName(current)) < 0) {
-                        var msg = "TypeError: expected one of " + allowedTypes +
-                            ", received " + that._getTypeName(current);
-                        throw new Error(msg);
-                    }
-                    return current;
-                };
-                return keyFunc;
-            }
+                        _functionMinBy: async function (resolvedArgs) {
+                                var exprefNode = resolvedArgs[1];
+                                var resolvedArray = resolvedArgs[0];
+                                var keyFunction = this.createKeyFunction(exprefNode, [TYPE_NUMBER, TYPE_STRING]);
+                                var minNumber = Infinity;
+                                var minRecord;
+                                var current;
+                                for (var i = 0; i < resolvedArray.length; i++) {
+                                    current = await keyFunction(resolvedArray[i]);
+                                    if (current < minNumber) {
+                                        minNumber = current;
+                                        minRecord = resolvedArray[i];
+                                    }
+                                }
+                                return minRecord;
+                            },
+
+                            createKeyFunction: function (exprefNode, allowedTypes) {
+                                var that = this;
+                                var interpreter = this._interpreter;
+                                var keyFunc = async function (x) {
+                                    var current = await interpreter.visit(exprefNode, x);
+                                    if (allowedTypes.indexOf(that._getTypeName(current)) < 0) {
+                                        var msg = "TypeError: expected one of " + allowedTypes +
+                                            ", received " + that._getTypeName(current);
+                                        throw new Error(msg);
+                                    }
+                                    return current;
+                                };
+                                return keyFunc;
+                            }
 
     };
 
